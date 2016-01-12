@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <title>2048 React</title>
+        <script src="js/react.js"></script>
+        <script src="js/react-dom.js"></script>
+        <script src="js/browser.min.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+        <link rel="stylesheet" href="css/main.css">
+    </head>
+    <body>
+		<div id="game" class="container"></div>
+        <script type="text/babel">
+        	var Game = React.createClass({
+                getInitialState: function(){
+                    var initialState = {
+                        tiles : [
+                        ]            
+                    }
+                    initialState.tiles = initialState.tiles.concat([
+                        
+                            this.getRandomTile(initialState.tiles)
+                        
+                    ])
+                    initialState.tiles = initialState.tiles.concat([
+                        
+                            this.getRandomTile(initialState.tiles)
+                         
+                    ])
+                    return initialState;
+                },
+                componentDidMount: function(){
+                    document.onkeydown = this.move;
+                },
+                getTilesFromColumn: function(column){
+                    return this.state.tiles.filter(function(tile){
+                        return tile.x === column
+                    })
+                },
+                getTilesFromLine: function(line){
+                    return this.state.tiles.filter(function(tile){
+                        return tile.y === line
+                    })
+                },
+                move : function(event){
+                    var left = 37;
+                    var up = 38;
+                    var right = 39;
+                    var down = 40;     
+                    if(event.keyCode == down){
+                        console.log('down');
+                        var fullTiles = [];
+                        var that = this;
+                        for(var i = 4; i >= 1; i--){
+                            var tiles = this.getTilesFromLine(i)
+                            tiles.forEach(function(tile){
+                                that.moveTileDown(tile, i)
+                            })
+                            fullTiles = fullTiles.concat(tiles);
+                            console.log(fullTiles)
+                        }
+                        this.setState({tiles: fullTiles})
+                    }          
+                },
+                moveTileDown: function(tile, line){
+                    var y = tile.y;
+                    if(y != 4){
+                        tile.y++
+                    }
+                    return tile
+                },
+                getRandomTile: function(tiles){
+                    var xRand = Math.floor(Math.random() * 4) + 1;
+                    var yRand = Math.floor(Math.random() * 4) + 1;
+                    var pos = xRand+"-"+yRand;
+                    var initial = ['2', '4'];
+                    var nbRand = initial[Math.floor(Math.random() * (2 - 0) + 0)];
+                    var filterTile = tiles.filter(function(tile) {
+                        return pos === tile.tileposition
+                    });
+                    if(filterTile.length > 0){
+                        return this.getRandomTile(tiles)
+                    }
+                    return {'value': nbRand, 'tileposition': pos, 'x': xRand, 'y': yRand} 
+                },
+                getGrid: function(){
+                    return(
+                        [0, 1, 2, 3].map(function(x){
+                            return(
+                                <div className="grid-row" key={x}>
+                                {
+                                    [0, 1, 2, 3].map(function(y){
+                                       return <div className="grid-cell" key={x + "-" + y}></div>
+                                    })
+                                }
+                                </div>
+                            )
+                        })
+                    )
+                },
+        		render: function(){
+                    return(
+                         <div className="game-container">
+                            <div className="grid-container">
+                                { this.getGrid() }
+                            </div>
+                            <div className="tile-container">
+                            {
+                                this.state.tiles.map(function(tile, i){
+                                    var style = "tile tile-"+ tile.value +" tile-position-"+ tile.x +"-"+ tile.y
+                                    return(
+                                        <div className={style} key={"tile-"+i}>
+                                            <div className="tile-inner" key={"innertile-"+i}>{tile.value}</div>
+                                        </div>
+                                    )
+                                }.bind(this))
+                            }
+                            </div>
+                         </div>
+        			)
+        		}
+        	});
+        	
+        	ReactDOM.render(
+        		<Game />,
+        		document.getElementById('game')
+        	);
+        </script>
+    </body>
+</html>
