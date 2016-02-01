@@ -297,8 +297,6 @@ hr {
     color: #f9f6f2; }
     .game-message.game-won a.keep-playing-button {
       display: inline-block; }
-  .game-message.game-won, .game-message.game-over {
-    display: block; }
     .game-message.game-won p, .game-message.game-over p {
       -webkit-animation: slide-up 1.5s ease-in-out 2500ms;
       -moz-animation: slide-up 1.5s ease-in-out 2500ms;
@@ -721,6 +719,7 @@ hr {
   margin-bottom: 0; }
 
 .restart-button {
+  font-size: 18px;
   display: inline-block;
   background: #8f7a66;
   -webkit-border-radius: 3px;
@@ -1297,3 +1296,14 @@ hr {
          animation: pop-in-small 700ms ease 2s both;
       margin-top: 10px;
       height: 76px; } }
+
+.best-container{
+    margin-left: 5px;
+}
+
+.above-game{
+  margin-top: 10px;
+}
+.game-message{
+  display: none;
+}
