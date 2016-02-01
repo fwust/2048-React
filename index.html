@@ -7,6 +7,7 @@
         <script src="js/react-dom.js"></script>
         <script src="js/browser.min.js"></script>
         <script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+        <script src="js/lodash.js"></script>
         <link rel="stylesheet" href="css/main.css">
     </head>
     <body>
@@ -19,19 +20,27 @@
                         ]            
                     }
                     initialState.tiles = initialState.tiles.concat([
-                        
                             this.getRandomTile(initialState.tiles)
-                        
                     ])
                     initialState.tiles = initialState.tiles.concat([
-                        
                             this.getRandomTile(initialState.tiles)
-                         
                     ])
                     return initialState;
                 },
                 componentDidMount: function(){
-                    document.onkeydown = this.move;
+                    //document.onkeypress = this.move;
+                    var fired = false;
+                    var that = this
+                    document.onkeydown = function(e) {
+                        if(!fired) {
+                            fired = true;
+                            that.move(e);
+                        }
+                    };
+
+                    document.onkeyup = function() {
+                        fired = false;
+                    };
                 },
                 getTilesFromColumn: function(column){
                     return this.state.tiles.filter(function(tile){
@@ -43,46 +52,276 @@
                         return tile.y === line
                     })
                 },
-                move : function(event){
+                generateNewTile: function(tiles){
+                    return tiles = tiles.concat([
+                        this.getRandomTile(tiles)
+                    ])
+                },
+                move: function(event){
                     var left = 37;
                     var up = 38;
                     var right = 39;
                     var down = 40;     
                     if(event.keyCode == down){
-                        console.log('down');
                         var fullTiles = [];
                         var that = this;
+                        var moved = false;
+                        var res; 
+                        var removeTiles = [];
                         for(var i = 4; i >= 1; i--){
                             var tiles = this.getTilesFromLine(i)
                             tiles.forEach(function(tile){
-                                that.moveTileDown(tile, i)
+                                res = that.moveTileDown(tile)
+                                if(res.action == 'merge'){
+                                    fullTiles = fullTiles.concat(res.value.add);
+                                    removeTiles = res.value.remove; 
+                                }
+                                moved = moved || res;
                             })
                             fullTiles = fullTiles.concat(tiles);
-                            console.log(fullTiles)
+                            if(removeTiles.length > 0){
+                                fullTiles = fullTiles.filter(function(tile){
+                                    if(tile.num == removeTiles[0].num || tile.num == removeTiles[1].num){
+                                        return false
+                                    }else{
+                                        return true
+                                    }
+                                })
+                            }
                         }
-                        this.setState({tiles: fullTiles})
+                        fullTiles = _.sortBy(fullTiles, function(n){
+                            return n.num;
+                        })
+                        if(moved){
+                            fullTiles = this.generateNewTile(fullTiles);
+                        }
+                       this.setState({tiles : fullTiles})
+                    }
+                    if(event.keyCode == up){
+                        var fullTiles = [];
+                        var that = this;
+                        var moved = false;
+                        var res;
+                        var removeTiles = [];
+                        for(var i = 1; i <= 4; i++){
+                            var tiles = this.getTilesFromLine(i)
+                            tiles.forEach(function(tile){
+                                res = that.moveTileUp(tile)
+                                if(res.action == 'merge'){
+                                    fullTiles = fullTiles.concat(res.value.add);
+                                    removeTiles = res.value.remove; 
+                                }
+                                moved = moved || res;
+                            })
+                            fullTiles = fullTiles.concat(tiles);
+                            if(removeTiles.length > 0){
+                                fullTiles = fullTiles.filter(function(tile){
+                                    if(tile.num == removeTiles[0].num || tile.num == removeTiles[1].num){
+                                        return false
+                                    }else{
+                                        return true
+                                    }
+                                })
+                            }
+                        }
+                        fullTiles = _.sortBy(fullTiles, function(n){
+                            return n.num;
+                        })
+                        if(moved){
+                            fullTiles = this.generateNewTile(fullTiles);
+                        }
+                       this.setState({tiles : fullTiles})
+                    }
+                    if(event.keyCode == right){
+                        var fullTiles = [];
+                        var that = this;
+                        var moved = false;
+                        var res; 
+                        var removeTiles = [];
+                        for(var i = 4; i >= 1; i--){
+                            var tiles = this.getTilesFromColumn(i)
+                            tiles.forEach(function(tile){
+                                res = that.moveTileRight(tile)
+                                if(res.action == 'merge'){
+                                    fullTiles = fullTiles.concat(res.value.add);
+                                    removeTiles = res.value.remove; 
+                                }
+                                moved = moved || res;
+                            })
+                            fullTiles = fullTiles.concat(tiles);
+                            if(removeTiles.length > 0){
+                                fullTiles = fullTiles.filter(function(tile){
+                                    if(tile.num == removeTiles[0].num || tile.num == removeTiles[1].num){
+                                        return false
+                                    }else{
+                                        return true
+                                    }
+                                })
+                            }
+                        }
+                        fullTiles = _.sortBy(fullTiles, function(n){
+                            return n.num;
+                        })
+                        if(moved){
+                            fullTiles = this.generateNewTile(fullTiles);
+                        }
+                       this.setState({tiles : fullTiles})
+                    }
+                    if(event.keyCode == left){
+                        var fullTiles = [];
+                        var that = this;
+                        var moved = false;
+                        var res; 
+                        var removeTiles = [];
+                        for(var i = 1; i <= 4; i++){
+                            var tiles = this.getTilesFromColumn(i);
+                            tiles.forEach(function(tile){
+                                res = that.moveTileLeft(tile)
+                                if(res.action == 'merge'){
+                                    fullTiles = fullTiles.concat(res.value.add);
+                                    removeTiles = res.value.remove; 
+                                }
+                                moved = moved || res;
+                            })
+                            fullTiles = fullTiles.concat(tiles);
+                            if(removeTiles.length > 0){
+                                fullTiles = fullTiles.filter(function(tile){
+                                    if(tile.num == removeTiles[0].num || tile.num == removeTiles[1].num){
+                                        return false
+                                    }else{
+                                        return true
+                                    }
+                                })
+                            }
+                        }
+                        fullTiles = _.sortBy(fullTiles, function(n){
+                            return n.num;
+                        })
+                        if(moved){
+                            fullTiles = this.generateNewTile(fullTiles);
+                        }
+                       this.setState({tiles : fullTiles})
                     }          
                 },
-                moveTileDown: function(tile, line){
-                    var y = tile.y;
-                    if(y != 4){
-                        tile.y++
+                moveTileDown: function(tile){
+                    if(tile.y != 4){
+                        if(this.checkTile(tile.x, tile.y + 1)){
+                            if(tile.value == this.getTile(tile.x, tile.y + 1).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x, tile.y + 1));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return false
+                        } else{
+                            tile.y++
+                            this.moveTileDown(tile)
+                            if(tile.value == this.getTile(tile.x, tile.y + 1).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x, tile.y + 1));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return tile
+                        }
                     }
-                    return tile
+                    return false;
+                },
+                moveTileUp: function(tile){
+                    if(tile.y != 1){
+                        if(this.checkTile(tile.x, tile.y - 1)){
+                            if(tile.value == this.getTile(tile.x, tile.y - 1).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x, tile.y - 1));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return false
+                        } else{
+                            tile.y--
+                            this.moveTileUp(tile)
+                            if(tile.value == this.getTile(tile.x, tile.y - 1).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x, tile.y - 1));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return tile
+                        }
+                    }
+                    return false;
+                },
+                moveTileRight: function(tile){
+                    if(tile.x != 4){
+                        if(this.checkTile(tile.x+1, tile.y)){
+                            if(tile.value == this.getTile(tile.x+1, tile.y).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x+1, tile.y));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return false
+                        } else{
+                            tile.x++
+                            this.moveTileRight(tile)
+                            if(tile.value == this.getTile(tile.x+1, tile.y).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x+1, tile.y));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return tile
+                        }
+                    }
+                    return false;
+                },
+                moveTileLeft: function(tile){
+                    if(tile.x != 1){
+                        if(this.checkTile(tile.x-1, tile.y)){
+                            if(tile.value == this.getTile(tile.x-1, tile.y).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x-1, tile.y));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return false
+                        } else{
+                            tile.x--
+                            this.moveTileLeft(tile)
+                            if(tile.value == this.getTile(tile.x-1, tile.y).value){
+                                console.log('merge')
+                                var res = this.mergeTile(tile, this.getTile(tile.x-1, tile.y));
+                                return {'action': 'merge', 'value': res}
+                            }
+                            return tile
+                        }
+                    }
+                    return false;
+                },
+                mergeTile: function(tile1, tile2){
+                    var tileValue = tile1.value;
+                    var newValue = tileValue * 2;
+                    newValue = newValue.toString();
+                    var mergedTile = {'value': newValue, num: Math.floor((Math.random() * 9999999) + 1), 'x': tile2.x, 'y': tile2.y}
+                    return {'remove' : [tile1, tile2], 'add' : mergedTile}
+                },
+                checkTile : function(x, y){
+                    for(var i = 0; i < this.state.tiles.length; i++){
+                        if(this.state.tiles[i].x == x && this.state.tiles[i].y == y) return true
+                    }
+                    return false
+                },
+                getTile : function(x, y){
+                    for(var i = 0; i < this.state.tiles.length; i++){
+                        if(this.state.tiles[i].x == x && this.state.tiles[i].y == y) return this.state.tiles[i]
+                    }
+                    return false
                 },
                 getRandomTile: function(tiles){
                     var xRand = Math.floor(Math.random() * 4) + 1;
                     var yRand = Math.floor(Math.random() * 4) + 1;
-                    var pos = xRand+"-"+yRand;
                     var initial = ['2', '4'];
                     var nbRand = initial[Math.floor(Math.random() * (2 - 0) + 0)];
                     var filterTile = tiles.filter(function(tile) {
-                        return pos === tile.tileposition
+                        return xRand === tile.x && yRand === tile.y
                     });
                     if(filterTile.length > 0){
                         return this.getRandomTile(tiles)
                     }
-                    return {'value': nbRand, 'tileposition': pos, 'x': xRand, 'y': yRand} 
+                    return {'value': nbRand, num: Math.floor((Math.random() * 9999999) + 1), 'x': xRand, 'y': yRand, 'delete': false} 
                 },
                 getGrid: function(){
                     return(
@@ -105,13 +344,13 @@
                             <div className="grid-container">
                                 { this.getGrid() }
                             </div>
-                            <div className="tile-container">
+                            <div className="tile-container" key="tile-container">
                             {
                                 this.state.tiles.map(function(tile, i){
                                     var style = "tile tile-"+ tile.value +" tile-position-"+ tile.x +"-"+ tile.y
                                     return(
-                                        <div className={style} key={"tile-"+i}>
-                                            <div className="tile-inner" key={"innertile-"+i}>{tile.value}</div>
+                                        <div className={style} key={"tile-"+tile.num}>
+                                            <div className="tile-inner">{tile.value}</div>
                                         </div>
                                     )
                                 }.bind(this))
